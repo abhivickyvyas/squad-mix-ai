@@ -1,59 +1,96 @@
 # Low Level Design (LLD) - SquadMix
 
-## 1. Component Structure (React)
+## 1. Frontend Component Architecture
 
-### `App.tsx` (Container)
-*   **State**:
-    *   `files`: Array of `File` objects.
-    *   `selectedVibe`: Enum `VibeType`.
-    *   `selectedAspectRatio`: String literal.
-    *   `generatedImage`: Base64 string URL (nullable).
-    *   `isLoading`: Boolean.
-    *   `error`: String (nullable).
-*   **Responsibilities**: Orchestrates the data flow, manages global state, handles top-level layout.
+The application is built as a React 19 Functional Component tree.
 
-### `components/UploadZone.tsx`
+### 1.1 `App.tsx` (Root Controller)
+The central hub handling state and orchestration.
+
+*   **State Variables**:
+    *   `files` (`File[]`): Stores the array of raw image objects selected by the user.
+    *   `selectedVibe` (`VibeType`): The current style configuration.
+    *   `selectedAspectRatio` (`AspectRatio`): Output dimensions (1:1, 3:4, 16:9).
+    *   `generatedImage` (`string | null`): The Base64 result string.
+    *   `isLoading` (`boolean`): Toggles the UI between "Edit" and "Processing" modes.
+    *   `error` (`string | null`): Capture mechanism for API failures.
+*   **Logic Flow**:
+    *   `handleGenerate`: 
+        1.  Checks `files.length > 0`.
+        2.  Sets `isLoading = true`.
+        3.  Calls `generateSquadImage`.
+        4.  On success: Sets `generatedImage`, clears `isLoading`.
+        5.  On fail: Sets `error`, clears `isLoading`.
+
+### 1.2 `components/UploadZone.tsx`
+Handles drag-and-drop and file selection logic.
 *   **Props**: `files`, `onFilesSelected`, `onRemoveFile`.
-*   **Logic**: Handles drag-and-drop (native file input), file limit validation (max 5), and preview rendering.
+*   **Validation**: Enforces hard limit of 5 images. If `files.length >= 5`, the input is disabled and visual cues (opacity) are applied.
+*   **Preview**: Uses `URL.createObjectURL(file)` to generate temporary thumbnails for immediate user feedback before upload.
 
-### `components/Button.tsx`
-*   **Props**: `variant` (primary, neon, etc.), `isLoading`, `onClick`.
-*   **Styling**: Contains specific Tailwind classes for the "Neon" glow effects.
+### 1.3 `services/geminiService.ts` (Data Layer)
+Encapsulates the `@google/genai` SDK interactions.
 
-## 2. Service Layer
+*   **Function `fileToPart(file: File)`**:
+    *   **Purpose**: Converts binary file to API-compatible Base64 string.
+    *   **Mechanism**: Uses `FileReader` API.
+    *   **Critical Step**: Strips the `data:image/xyz;base64,` prefix from the string, as the Gemini API expects raw Base64 data in the `inlineData` field.
 
-### `services/geminiService.ts`
-This is a pure TypeScript module handling API communication.
+*   **Function `generateSquadImage(...)`**:
+    *   **Inputs**: `files`, `vibe`, `aspectRatio`, `promptSuffix`.
+    *   **Prompt Construction Strategy**:
+        *   Base Prompt: "Generate a high-quality, cohesive group image..."
+        *   Context Injection: Appends the specific description associated with the `VibeType` (e.g., "sitting together", "cyberpunk city").
+        *   Identity Preservation: Explicitly adds instructions: "Maintain the facial features and identifying characteristics...".
+    *   **API Call**:
+        *   Method: `ai.models.generateContent`.
+        *   Model: `gemini-2.5-flash-image`.
+        *   Config: Passes `aspectRatio` in `imageConfig`.
 
-#### Function: `fileToPart(file: File)`
-*   **Input**: Standard JS `File` object.
-*   **Output**: Promise resolving to an object `{ inlineData: { data: string, mimeType: string } }`.
-*   **Logic**: Uses `FileReader` to read file as DataURL, then strips the metadata prefix (`data:image/jpeg;base64,`) to get raw base64.
+## 2. Data Structures & Enums
 
-#### Function: `generateSquadImage(...)`
-*   **Inputs**: `files`, `vibe`, `aspectRatio`, `promptSuffix`.
-*   **Logic**:
-    1.  Initialize `GoogleGenAI` client with `process.env.API_KEY`.
-    2.  Map input files to API-compatible parts using `fileToPart`.
-    3.  **Prompt Engineering**: A `switch` statement constructs a detailed text prompt based on the `VibeType`.
-        *   *Example*: If `VibeType.CYBERPUNK`, appends "Place them in a futuristic cyberpunk city...".
-    4.  Calls `ai.models.generateContent` using model `gemini-2.5-flash-image`.
-    5.  Configures `imageConfig` with the selected `aspectRatio`.
-    6.  Parses the response to find the `inlineData` of the generated image.
-    7.  Returns the full Data URI to the UI.
+### 2.1 `types.ts`
 
-## 3. Data Models (`types.ts`)
-
+**Enum: `VibeType`**
+Used to ensure type safety when selecting styles.
 ```typescript
-enum VibeType {
-  TOGETHER, DANCING, CELEBRATING, CARTOON, 
-  CYBERPUNK, BEACH_DAY, RETRO_90S, FESTIVAL, 
-  STARTUP, FANTASY
+export enum VibeType {
+  TOGETHER = 'sitting_together',
+  DANCING = 'dancing_party',
+  CELEBRATING = 'celebrating',
+  CARTOON = 'cartoon_style',
+  CYBERPUNK = 'cyberpunk',
+  BEACH_DAY = 'beach_day',
+  RETRO_90S = 'retro_90s',
+  FESTIVAL = 'festival',
+  STARTUP = 'startup',
+  FANTASY = 'fantasy'
 }
-
-type AspectRatio = '1:1' | '3:4' | '16:9';
 ```
 
-## 4. Error Handling
-*   **UI Level**: Displays error banners if upload count is 0 or API fails.
-*   **Service Level**: Catches API exceptions (e.g., quota exceeded, safety filters) and propagates meaningful messages to the UI.
+**Interface: `VibeOption`**
+Metadata for UI generation.
+```typescript
+export interface VibeOption {
+  id: VibeType;
+  label: string;       // Button text
+  emoji: string;       // Visual icon
+  promptSuffix: string;// Prompt engineering text
+  description: string; // Helper text
+}
+```
+
+## 3. Error Handling & Edge Cases
+
+| Scenario | Detection | Handling |
+| :--- | :--- | :--- |
+| **No File Selected** | `files.length === 0` in `handleGenerate` | Display error toast "Please upload at least 1 image". |
+| **API Key Missing** | `process.env.API_KEY` is undefined | SDK throws error. UI displays generic "Configuration Error". |
+| **Safety Block** | API returns `finishReason: SAFETY` | `try/catch` block in Service layer catches exception. UI shows "Image blocked by safety filters". |
+| **Network Fail** | `fetch` failure inside SDK | `try/catch` block catches network error. UI shows "Connection failed". |
+
+## 4. UI/UX Implementation Details
+
+*   **Loading State**: When `isLoading` is true, the "Cook It Up" button transforms into a spinner. The interface does *not* lock completely, but the generate button is disabled to prevent double-submission.
+*   **Result View**: The result section uses an animation (`animate-in slide-in-from-bottom`) to provide a smooth entry when the image is ready.
+*   **Tailwind Configuration**: Custom colors (`neon-pink`, `neon-blue`) are defined in the `tailwind.config` within `index.html` to ensure consistent branding across components.
