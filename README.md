@@ -1,3 +1,5 @@
+<img src="./banner.svg" alt="SquadMix Banner" width="100%" />
+
 # SquadMix Gen Z 📸
 
 **SquadMix** is a React-based web application that uses Google's **Gemini 2.5 Flash** multimodal AI to remix individual photos of friends into cohesive, stylized group shots. Designed with a "Gen Z" aesthetic, it features a neon-dark mode UI, rapid generation times, and varied "vibes" ranging from 90s Retro to Cyberpunk.

@@ -1,0 +1,52 @@
+<svg width="1200" height="600" viewBox="0 0 1200 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="600" fill="#050505"/>
+  <defs>
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff00ff" />
+      <stop offset="50%" stop-color="#bd00ff" />
+      <stop offset="100%" stop-color="#00ffff" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background Grid -->
+  <rect width="1200" height="600" fill="url(#grid)" opacity="0.5"/>
+
+  <!-- Abstract Photo Cards Background -->
+  <g opacity="0.6">
+    <!-- Left Card -->
+    <rect x="250" y="150" width="240" height="320" rx="20" transform="rotate(-15 370 310)" stroke="#bd00ff" stroke-width="4" fill="#121212"/>
+    <!-- Right Card -->
+    <rect x="710" y="150" width="240" height="320" rx="20" transform="rotate(15 830 310)" stroke="#00ffff" stroke-width="4" fill="#121212"/>
+    <!-- Center Card -->
+    <rect x="480" y="100" width="240" height="320" rx="20" stroke="#ff00ff" stroke-width="4" fill="#121212"/>
+  </g>
+
+  <!-- Decorative Glow Orbs -->
+  <circle cx="100" cy="500" r="150" fill="#ff00ff" filter="url(#glow)" opacity="0.15"/>
+  <circle cx="1100" cy="100" r="150" fill="#00ffff" filter="url(#glow)" opacity="0.15"/>
+
+  <!-- Main Text -->
+  <text x="600" y="350" font-family="'Inter', sans-serif" font-weight="900" font-size="140" text-anchor="middle" fill="white" filter="url(#glow)">
+    Squad<tspan fill="url(#neonGrad)">Mix</tspan>
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="440" font-family="monospace" font-weight="bold" font-size="24" text-anchor="middle" fill="#888888" letter-spacing="8">
+    GEN Z AI REMIXER
+  </text>
+  
+  <!-- Sparkles -->
+  <path d="M1000 450 L1010 440 L1020 450 L1010 460 Z" fill="white" filter="url(#glow)"/>
+  <path d="M200 150 L215 135 L230 150 L215 165 Z" fill="#00ffff" filter="url(#glow)"/>
+  <path d="M900 100 L910 80 L920 100 L910 120 Z" fill="#ff00ff" filter="url(#glow)"/>
+</svg>

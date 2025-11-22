@@ -23,34 +23,43 @@ SquadMix follows a **Client-Serverless** architecture. We act as a "Thick Client
 
 ```mermaid
 graph TB
-    subgraph Client_Device [Client Device / Browser]
+    %% Styles
+    classDef ui fill:#1a1a1a,stroke:#bd00ff,stroke-width:2px,color:#fff
+    classDef logic fill:#1a1a1a,stroke:#00ffff,stroke-width:2px,color:#fff
+    classDef cloud fill:#1a1a1a,stroke:#ff00ff,stroke-width:2px,color:#fff
+    classDef container fill:#050505,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5,color:#eee
+
+    subgraph Client_Device ["💻 Client Device / Browser"]
         direction TB
         
-        subgraph UI_Layer [UI Layer - React 19]
-            AppComponent[App.tsx]
-            UploadZone[UploadZone.tsx]
+        subgraph UI_Layer ["🎨 Presentation Layer"]
+            CoreUI["Main Application View"]:::ui
+            InputMod["Input Module"]:::ui
         end
         
-        subgraph Logic_Layer [Logic Layer]
-            State[State Management]
-            Service[Gemini Service]
-            PromptEng[Prompt Engineering Logic]
+        subgraph Logic_Layer ["🧠 Business Logic Layer"]
+            StateManager["State Manager"]:::logic
+            APIService["Integration Service"]:::logic
+            PromptEng["Prompt Engine"]:::logic
         end
     end
     
-    subgraph Cloud_Infrastructure [Google Cloud Platform]
-        GeminiModel[Gemini 2.5 Flash Image Model]
-        SafetyFilters[Safety & Privacy Filters]
+    subgraph Cloud_Infrastructure ["☁️ Google Cloud Platform"]
+        GeminiModel["♊ Gemini 2.5 Flash"]:::cloud
+        SafetyFilters["🛡️ Safety Filters"]:::cloud
     end
     
-    AppComponent --> State
-    AppComponent --> Service
+    %% Applying Container Styles
+    class Client_Device,Cloud_Infrastructure container
     
-    Service --> PromptEng
+    CoreUI --> StateManager
+    CoreUI --> APIService
     
-    Service -- "HTTPS / JSON (Multimodal Payload)" --> SafetyFilters
+    APIService --> PromptEng
+    
+    APIService -- "HTTPS / JSON (Multimodal Payload)" --> SafetyFilters
     SafetyFilters --> GeminiModel
-    GeminiModel -- "Generated Image Blob" --> Service
+    GeminiModel -- "Generated Image Blob" --> APIService
 ```
 
 ## The Data Flow 🔄
