@@ -26,7 +26,7 @@ graph TB
     subgraph Client_Device [Client Device / Browser]
         direction TB
         
-        subgraph UI_Layer [UI Layer (React 19)]
+        subgraph UI_Layer [UI Layer - React 19]
             AppComponent[App.tsx]
             UploadZone[UploadZone.tsx]
         end
