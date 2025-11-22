@@ -1,3 +1,4 @@
+
 # Building SquadMix: A Technical Deep Dive into Gen Z AI Photo Composition
 
 In the age of remote work and digital friendships, getting a photo of your whole "squad" together is harder than ever. And even when you are together, getting everyone to look at the camera at the same time is a miracle.
@@ -11,6 +12,37 @@ In this post, we'll go beyond the basics and look at the **System Architecture**
 The goal was simple: **Input** (separate photos of friends) + **Vibe** (Style/Context) = **Output** (One epic group photo).
 
 I wanted the UI to feel modern and appealing to a younger demographic—think dark modes, neon accents, and emojis. But more importantly, I wanted the technology underneath to be blazing fast.
+
+## The User Flow 🌊
+
+Before diving into the code, let's look at the user journey. It is a linear process designed to be as frictionless as possible. The app handles validation client-side before engaging the heavy lifting of the API.
+
+```mermaid
+graph TD
+    Start((Start)) --> Upload[Upload 1-5 Images]
+    Upload --> Check{Count > 0?}
+    Check -- No --> Error[Show Error]
+    Check -- Yes --> Vibe[Select Vibe]
+    
+    Vibe --> Ratio[Select Aspect Ratio]
+    Ratio --> Cook[Click 'Cook It Up']
+    
+    Cook --> Loading[Show Loading Spinner]
+    Loading --> Process[Convert Files to Base64]
+    Process --> Prompt[Construct Prompt based on Vibe]
+    Prompt --> API[Call Gemini API]
+    
+    API --> Result{Success?}
+    
+    Result -- No --> Catch[Catch Error]
+    Catch --> DisplayErr[Display Error Message]
+    DisplayErr --> Cook
+    
+    Result -- Yes --> Render[Render Generated Image]
+    Render --> Download[Download Image]
+    Render --> Retry[Change Vibe/Retry]
+    Retry --> Vibe
+```
 
 ## System Architecture 🏗️
 
