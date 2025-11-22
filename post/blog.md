@@ -23,35 +23,35 @@ SquadMix follows a **Client-Serverless** architecture. We act as a "Thick Client
 
 ```mermaid
 graph TB
-    %% Styles
-    classDef ui fill:#1a1a1a,stroke:#bd00ff,stroke-width:2px,color:#fff
-    classDef logic fill:#1a1a1a,stroke:#00ffff,stroke-width:2px,color:#fff
-    classDef cloud fill:#1a1a1a,stroke:#ff00ff,stroke-width:2px,color:#fff
-    classDef container fill:#050505,stroke:#333,stroke-width:2px,stroke-dasharray: 5 5,color:#eee
+    %% Styles (No black used)
+    classDef ui fill:#e8e3ff,stroke:#6a5acd,stroke-width:2px,color:#1a1a1a
+    classDef logic fill:#e0f7fa,stroke:#00acc1,stroke-width:2px,color:#1a1a1a
+    classDef cloud fill:#ffe4f2,stroke:#ff69b4,stroke-width:2px,color:#1a1a1a
+    classDef container fill:#f7f7f7,stroke:#b0b0b0,stroke-width:2px,stroke-dasharray: 5 5,color:#333
 
-    subgraph Client_Device ["💻 Client Device / Browser"]
+    subgraph Client_Device["💻 Client Device / Browser"]
         direction TB
         
-        subgraph UI_Layer ["🎨 Presentation Layer"]
+        subgraph UI_Layer["🎨 Presentation Layer"]
             CoreUI["Main Application View"]:::ui
             InputMod["Input Module"]:::ui
         end
         
-        subgraph Logic_Layer ["🧠 Business Logic Layer"]
+        subgraph Logic_Layer["🧠 Business Logic Layer"]
             StateManager["State Manager"]:::logic
             APIService["Integration Service"]:::logic
             PromptEng["Prompt Engine"]:::logic
         end
     end
     
-    subgraph Cloud_Infrastructure ["☁️ Google Cloud Platform"]
+    subgraph Cloud_Infrastructure["☁️ Google Cloud Platform"]
         GeminiModel["♊ Gemini 2.5 Flash"]:::cloud
         SafetyFilters["🛡️ Safety Filters"]:::cloud
     end
     
     %% Applying Container Styles
     class Client_Device,Cloud_Infrastructure container
-    
+
     CoreUI --> StateManager
     CoreUI --> APIService
     
