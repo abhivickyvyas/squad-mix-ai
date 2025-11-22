@@ -1,0 +1,5 @@
+{
+  "name": "SquadMix Gen Z",
+  "description": "Upload pics of your friends and generate a single group photo in various vibes using Gemini 3 Pro.",
+  "requestFramePermissions": []
+}
